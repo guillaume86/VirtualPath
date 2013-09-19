@@ -1,0 +1,173 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using AlexPilotti.FTPS.Client;
+using AlexPilotti.FTPS.Common;
+using VirtualPath.Common;
+
+namespace VirtualPath.AlexFTPS
+{
+    [Export("AlexFTPS", typeof(IVirtualPathProvider))]
+    //[Export("FTPS", typeof(IVirtualPathProvider))] // TODO: subclass
+    [Export("FTP", typeof(IVirtualPathProvider))] // TODO: subclass
+    public class FtpVirtualPathProvider : AbstractVirtualPathProviderBase
+    {
+        private string Host;
+        private string Username;
+        private string Password;
+        private bool IsConnected;
+        private int? Port;
+
+        public FTPSClient Client { get; private set; }
+
+        private FTPSClient ConnectedClient
+        {
+            get
+            {
+                if (!IsConnected)
+                {
+                    Connect();
+                }
+                return Client;
+            }
+        }
+
+        public FtpVirtualPathProvider(FTPSClient client, string host, int? port, string username, string password)
+        {
+            this.Client = client;
+            this.Host = host;
+            this.Username = username;
+            this.Password = password;
+            this.Port = port;
+        }
+
+        public FtpVirtualPathProvider(string host, string username, string password)
+            : this(new FTPSClient(), host, null, username, password)
+        {
+
+        }
+
+        public FtpVirtualPathProvider(string host, int port, string username, string password)
+            : this(new FTPSClient(), host, port, username, password)
+        {
+
+        }
+
+        private void Connect()
+        {
+            if (Port != null)
+            {
+                Client.Connect(
+                    this.Host,
+                    this.Port.Value,
+                    new NetworkCredential(this.Username, this.Password),
+                    //ESSLSupportMode.CredentialsRequired | ESSLSupportMode.DataChannelRequested);
+                    ESSLSupportMode.ClearText,
+                    null, null, 0, 0, 0, null);
+            }
+            else
+            {
+                Client.Connect(
+                    this.Host,
+                    new NetworkCredential(this.Username, this.Password),
+                    //ESSLSupportMode.CredentialsRequired | ESSLSupportMode.DataChannelRequested);
+                    ESSLSupportMode.ClearText);
+            }
+
+            IsConnected = true;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            Client.Dispose();
+            IsConnected = false;
+        }
+
+        private IVirtualDirectory _rootDirectory;
+        public override IVirtualDirectory RootDirectory
+        {
+            get { return _rootDirectory = (_rootDirectory ?? new FtpVirtualDirectory(this, null)); }
+        }
+
+        public override string VirtualPathSeparator
+        {
+            get { return "/"; }
+        }
+
+        public override string RealPathSeparator
+        {
+            get { return "/"; }
+        }
+
+        internal IEnumerable<DirectoryListItem> ListContents(string virtualPath)
+        {
+            return ConnectedClient.GetDirectoryList(virtualPath);
+        }
+
+        internal void CreateDirectory(string virtualPath)
+        {
+            ConnectedClient.MakeDir(virtualPath);
+        }
+
+        internal void DeleteDirectory(string virtualPath)
+        {
+            ConnectedClient.RemoveDir(virtualPath);
+        }
+
+        internal System.IO.Stream CreateFile(string fileName)
+        {
+            return ConnectedClient.PutFile(fileName);
+        }
+
+        internal void CreateFile(string fileName, byte[] contents)
+        {
+            using (var stream = CreateFile(fileName))
+            {
+                stream.Write(contents, 0, contents.Length);
+            }
+        }
+
+        internal void DeleteFile(string virtualPath)
+        {
+            ConnectedClient.DeleteFile(virtualPath);
+        }
+
+        internal System.IO.Stream OpenRead(string virtualPath)
+        {
+            return ConnectedClient.GetFile(virtualPath);
+        }
+
+        internal System.IO.Stream OpenWrite(string virtualPath, byte[] originalData)
+        {
+            return new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data), originalData);
+        }
+
+        internal System.IO.Stream OpenWrite(string virtualPath, WriteMode mode)
+        {
+            if (mode == WriteMode.Truncate)
+            {
+                return new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data));
+            }
+            else
+            {
+                var bytes = default(byte[]);
+                using (var readStream = ConnectedClient.GetFile(virtualPath))
+                {
+                    bytes = Extensions.ReadStreamToEnd(readStream);
+                }
+
+                var stream = new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data), bytes);
+                if (mode == WriteMode.Append)
+                {
+                    stream.Seek(stream.Length, System.IO.SeekOrigin.Begin);
+                }
+                return stream;
+            }
+        }
+    }
+}

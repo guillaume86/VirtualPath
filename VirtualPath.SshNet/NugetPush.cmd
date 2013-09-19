@@ -1,0 +1,1 @@
+"..\packages\NuGet.CommandLine.2.7.1\tools\NuGet.exe" push VirtualPath.SshNet.%1.nupkg

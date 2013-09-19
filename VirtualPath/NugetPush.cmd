@@ -1,0 +1,1 @@
+"..\packages\NuGet.CommandLine.2.7.1\tools\NuGet.exe" push VirtualPath.%1.nupkg
