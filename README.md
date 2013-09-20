@@ -60,7 +60,7 @@ __Finding the constructor:__
 
 ## Available providerNames:
 
-- InMemoryVirtualPathProvider: InMemeory
+- InMemoryVirtualPathProvider: Memory
 - FileSystemVirtualPathProvider: FileSystem, FS
 - FtpVirtualPathProvider: AlexFTPS, FTP
 - SftpVirtualPathProvider: SshNet, SFTP

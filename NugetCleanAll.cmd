@@ -1,11 +1,11 @@
 cd VirtualPath
-call NugetPush.cmd %1
+del *.nupkg
 cd ..\VirtualPath.AlexFTPS
-call NugetPush.cmd %1
+del *.nupkg
 cd ..\VirtualPath.SshNet
-call NugetPush.cmd %1
+del *.nupkg
 cd ..\VirtualPath.DropNet
-call NugetPush.cmd %1
+del *.nupkg
 cd ..\VirtualPath.DotNetZip
-call NugetPush.cmd %1
+del *.nupkg
 cd ..

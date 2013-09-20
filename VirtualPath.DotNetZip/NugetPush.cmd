@@ -1,0 +1,1 @@
+"..\packages\NuGet.CommandLine.2.7.1\tools\NuGet.exe" push VirtualPath.DotNetZip.%1.nupkg
