@@ -531,7 +531,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderMove");
 
-            var newFile = file.Move(dir);
+            var newFile = file.MoveTo(dir);
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Directory, Is.EqualTo(dir));
@@ -544,7 +544,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderMove");
 
-            var newFile = file.Move(dir, "newfile.txt");
+            var newFile = file.MoveTo(dir, "newfile.txt");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
@@ -558,7 +558,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderMove");
 
-            var newFile = file.Move("FolderMove");
+            var newFile = file.MoveTo("FolderMove");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Directory, Is.EqualTo(dir));
@@ -571,7 +571,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderMove");
 
-            var newFile = file.Move("FolderMove", "newfile.txt");
+            var newFile = file.MoveTo("FolderMove", "newfile.txt");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
@@ -587,7 +587,7 @@ namespace VirtualPath.Tests
                 var file = Provider.CreateFile("test.txt", "test data");
                 var dir = otherProvider.CreateDirectory("FolderMove");
 
-                var newFile = file.Move(dir);
+                var newFile = file.MoveTo(dir);
 
                 Assert.That(newFile, Is.Not.Null);
                 Assert.That(newFile.Directory, Is.EqualTo(dir));
@@ -602,7 +602,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderCopy");
 
-            var newFile = file.Copy(dir);
+            var newFile = file.CopyTo(dir);
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Directory, Is.EqualTo(dir));
@@ -615,7 +615,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderCopy");
 
-            var newFile = file.Copy(dir, "newfile.txt");
+            var newFile = file.CopyTo(dir, "newfile.txt");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
@@ -629,7 +629,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderCopy");
 
-            var newFile = file.Copy("FolderCopy");
+            var newFile = file.CopyTo("FolderCopy");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Directory, Is.EqualTo(dir));
@@ -642,7 +642,7 @@ namespace VirtualPath.Tests
             var file = Provider.CreateFile("test.txt", "test data");
             var dir = Provider.CreateDirectory("FolderCopy");
 
-            var newFile = file.Copy("FolderCopy", "newfile.txt");
+            var newFile = file.CopyTo("FolderCopy", "newfile.txt");
 
             Assert.That(newFile, Is.Not.Null);
             Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
@@ -658,7 +658,7 @@ namespace VirtualPath.Tests
                 var file = Provider.CreateFile("test.txt", "test data");
                 var dir = otherProvider.CreateDirectory("FolderMove");
 
-                var newFile = file.Copy(dir);
+                var newFile = file.CopyTo(dir);
 
                 Assert.That(newFile, Is.Not.Null);
                 Assert.That(newFile.Directory, Is.EqualTo(dir));

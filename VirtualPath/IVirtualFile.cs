@@ -18,14 +18,14 @@ namespace VirtualPath
         Stream OpenWrite();
         Stream OpenWrite(WriteMode mode);
 
-        IVirtualFile Copy(IVirtualDirectory destination);
-        IVirtualFile Copy(IVirtualDirectory destination, string destFilename);
-        IVirtualFile Copy(string destDirVirtualPath);
-        IVirtualFile Copy(string destDirVirtualPath, string destFilename);
+        IVirtualFile CopyTo(IVirtualDirectory destination);
+        IVirtualFile CopyTo(IVirtualDirectory destination, string destFilename);
+        IVirtualFile CopyTo(string destDirVirtualPath);
+        IVirtualFile CopyTo(string destDirVirtualPath, string destFilename);
 
-        IVirtualFile Move(IVirtualDirectory destination);
-        IVirtualFile Move(IVirtualDirectory destination, string destFilename);
-        IVirtualFile Move(string destDirVirtualPath);
-        IVirtualFile Move(string destDirVirtualPath, string destFilaname);
+        IVirtualFile MoveTo(IVirtualDirectory destination);
+        IVirtualFile MoveTo(IVirtualDirectory destination, string destFilename);
+        IVirtualFile MoveTo(string destDirVirtualPath);
+        IVirtualFile MoveTo(string destDirVirtualPath, string destFilaname);
     }
 }
