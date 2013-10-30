@@ -68,24 +68,24 @@ namespace VirtualPath.Common
                 && virtualFile.RealPath.Contains(String.Format("{0}{1}", RealPathSeparator, "Views"));
         }
 
-        public IVirtualFile AddFile(string filePath, string contents)
+        public IVirtualFile CreateFile(string filePath, string contents)
         {
-            return RootDirectory.AddFile(filePath, contents);
+            return RootDirectory.CreateFile(filePath, contents);
         }
 
-        public IVirtualFile AddFile(string filePath, byte[] contents)
+        public IVirtualFile CreateFile(string filePath, byte[] contents)
         {
-            return RootDirectory.AddFile(filePath, contents);
+            return RootDirectory.CreateFile(filePath, contents);
         }
 
-        public IVirtualDirectory AddDirectory(string virtualPath)
+        public IVirtualDirectory CreateDirectory(string virtualPath)
         {
-            return RootDirectory.AddDirectory(virtualPath);
+            return RootDirectory.CreateDirectory(virtualPath);
         }
 
-        public System.IO.Stream AddFile(string filePath)
+        public System.IO.Stream CreateFile(string filePath)
         {
-            return RootDirectory.AddFile(filePath);
+            return RootDirectory.CreateFile(filePath);
         }
 
         public virtual void Dispose()

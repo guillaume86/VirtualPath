@@ -109,7 +109,7 @@ namespace VirtualPath.AlexFTPS
             return ConnectedClient.GetDirectoryList(virtualPath);
         }
 
-        internal void CreateDirectory(string virtualPath)
+        internal void CreateDirectoryInternal(string virtualPath)
         {
             ConnectedClient.MakeDir(virtualPath);
         }
@@ -119,14 +119,14 @@ namespace VirtualPath.AlexFTPS
             ConnectedClient.RemoveDir(virtualPath);
         }
 
-        internal System.IO.Stream CreateFile(string fileName)
+        internal System.IO.Stream CreateFileInternal(string fileName)
         {
             return ConnectedClient.PutFile(fileName);
         }
 
-        internal void CreateFile(string fileName, byte[] contents)
+        internal void CreateFileInternal(string fileName, byte[] contents)
         {
-            using (var stream = CreateFile(fileName))
+            using (var stream = CreateFileInternal(fileName))
             {
                 stream.Write(contents, 0, contents.Length);
             }
@@ -144,30 +144,34 @@ namespace VirtualPath.AlexFTPS
 
         internal System.IO.Stream OpenWrite(string virtualPath, byte[] originalData)
         {
-            return new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data), originalData);
+            return new InMemory.InMemoryStream((data) => CreateFileInternal(virtualPath, data), originalData);
         }
 
         internal System.IO.Stream OpenWrite(string virtualPath, WriteMode mode)
         {
             if (mode == WriteMode.Truncate)
             {
-                return new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data));
+                return ConnectedClient.PutFile(virtualPath);
             }
-            else
+            else if (mode == WriteMode.Append)
+            {
+                return ConnectedClient.AppendFile(virtualPath);
+            }
+            else // if (mode == WriteMode.Overwrite)
             {
                 var bytes = default(byte[]);
                 using (var readStream = ConnectedClient.GetFile(virtualPath))
                 {
-                    bytes = Extensions.ReadStreamToEnd(readStream);
+                    bytes = StreamExtensions.ReadStreamToEnd(readStream);
                 }
-
-                var stream = new InMemory.InMemoryStream((data) => CreateFile(virtualPath, data), bytes);
-                if (mode == WriteMode.Append)
-                {
-                    stream.Seek(stream.Length, System.IO.SeekOrigin.Begin);
-                }
+                var stream = new InMemory.InMemoryStream((data) => CreateFileInternal(virtualPath, data), bytes);
                 return stream;
             }
+        }
+
+        internal void Rename(string virtualPathSrc, string virtualPathDst)
+        {
+            ConnectedClient.RenameFile(virtualPathSrc, virtualPathDst);
         }
     }
 }

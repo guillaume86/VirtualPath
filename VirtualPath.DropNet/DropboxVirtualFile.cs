@@ -49,5 +49,40 @@ namespace VirtualPath.DropNet
         {
             return Provider.OpenWrite(this.Directory.VirtualPath, this.Name, mode);
         }
+
+        protected override IVirtualFile CopyBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            if (directory is DropboxVirtualDirectory)
+            {
+                var dir = (DropboxVirtualDirectory)directory;
+                if (dir.Provider == this.Provider)
+                {
+                    Provider.Copy(this.VirtualPath, Provider.CombineVirtualPath(directory.VirtualPath, name));
+                    return new DropboxVirtualFile(Provider, dir, name);
+                }
+            }
+
+            // TODO: copy cross Dropboxes using CopyRef?
+
+            return directory.CopyFile(this, name);
+        }
+
+        protected override IVirtualFile MoveBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            if (directory is DropboxVirtualDirectory)
+            {
+                var dir = (DropboxVirtualDirectory)directory;
+                if (dir.Provider == this.Provider)
+                {
+                    Provider.Move(this.VirtualPath, Provider.CombineVirtualPath(directory.VirtualPath, name));
+                    ((DropboxVirtualDirectory)Directory).RemoveFromContents(this);
+                    return new DropboxVirtualFile(Provider, dir, name);
+                }
+            }
+
+            var newFile = directory.CopyFile(this, name);
+            this.Delete();
+            return newFile;
+        }
     }
 }

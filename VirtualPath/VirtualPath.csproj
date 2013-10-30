@@ -46,7 +46,7 @@
     <Compile Include="..\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Extensions.cs" />
+    <Compile Include="VirtualPathExtensions.cs" />
     <Compile Include="Materializer.cs" />
     <Compile Include="IVirtualDirectory.cs" />
     <Compile Include="IVirtualFile.cs" />

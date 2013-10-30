@@ -99,12 +99,6 @@ namespace VirtualPath.InMemory
             return matchingFilesInBackingDir;
         }
 
-        public IEnumerable<InMemoryVirtualFile> EnumerateFiles(string pattern)
-        {
-            return files
-                .Where(file => file.Name.Glob(pattern));
-        }
-
         protected override IVirtualDirectory GetDirectoryFromBackingDirectoryOrDefault(string directoryName)
         {
             return dirs.SingleOrDefault(d => d.Name == directoryName);
@@ -225,6 +219,18 @@ namespace VirtualPath.InMemory
 
                 return stream;
             }
+        }
+
+        protected override IVirtualFile CopyBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            return directory.CopyFile(this, name);
+        }
+
+        protected override IVirtualFile MoveBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            var newFile = directory.CopyFile(this, name);
+            this.Delete();
+            return newFile;
         }
     }
 

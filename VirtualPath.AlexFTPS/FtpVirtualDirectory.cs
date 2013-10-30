@@ -10,7 +10,7 @@ namespace VirtualPath.AlexFTPS
 {
     public class FtpVirtualDirectory : AbstractVirtualDirectoryBase
     {
-        private FtpVirtualPathProvider Provider;
+        internal FtpVirtualPathProvider Provider { get; private set; }
 
         public FtpVirtualDirectory(FtpVirtualPathProvider owningProvider, FtpVirtualDirectory parentDirectory, 
             string name = null, DateTime? lastModified = null) : base(owningProvider, parentDirectory)
@@ -91,9 +91,14 @@ namespace VirtualPath.AlexFTPS
                 Provider.DeleteDirectory(node.VirtualPath);
             }
 
+            RemoveFromContents(node.Name);
+        }
+
+        internal void RemoveFromContents(string name)
+        {
             if (this._contents != null)
             {
-                this._contents.RemoveAll(c => c.Name == node.Name);
+                this._contents.RemoveAll(c => c.Name == name);
             }
         }
 
@@ -106,7 +111,7 @@ namespace VirtualPath.AlexFTPS
             }
 
             var virtualPath = Provider.CombineVirtualPath(this.VirtualPath, name);
-            Provider.CreateDirectory(virtualPath);
+            Provider.CreateDirectoryInternal(virtualPath);
 
             if (this._contents != null)
             {
@@ -124,7 +129,7 @@ namespace VirtualPath.AlexFTPS
         protected override IVirtualFile AddFileToBackingDirectoryOrDefault(string fileName, byte[] contents)
         {
             var virtualPath = AddFileToContents(fileName);
-            Provider.CreateFile(virtualPath, contents);
+            Provider.CreateFileInternal(virtualPath, contents);
             return new FtpVirtualFile(Provider, this, fileName, DateTime.Now);
         }
 
@@ -152,7 +157,7 @@ namespace VirtualPath.AlexFTPS
         protected override System.IO.Stream AddFileToBackingDirectoryOrDefault(string fileName)
         {
             var virtualPath = AddFileToContents(fileName);
-            return Provider.CreateFile(virtualPath);
+            return Provider.CreateFileInternal(virtualPath);
         }
     }
 }

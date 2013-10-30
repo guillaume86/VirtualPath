@@ -8,7 +8,7 @@ namespace VirtualPath.Common
 {
     public abstract class AbstractVirtualDirectoryBase : IVirtualDirectory
     {
-        protected IVirtualPathProvider VirtualPathProvider;
+        public IVirtualPathProvider VirtualPathProvider { get; private set; }
         public IVirtualDirectory ParentDirectory { get; set; }
         public IVirtualDirectory Directory { get { return this; } }
 
@@ -48,6 +48,11 @@ namespace VirtualPath.Common
             return GetDirectory(tokens);
         }
 
+        private string UntokenizeVirtualPath(Stack<string> virtualPath)
+        {
+            return virtualPath.Aggregate((a, b) => this.VirtualPathProvider.CombineVirtualPath(a, b));
+        }
+
         public virtual IVirtualFile GetFile(Stack<string> virtualPath)
         {
             if (virtualPath.Count == 0)
@@ -59,7 +64,7 @@ namespace VirtualPath.Common
             
             var virtDir = GetDirectoryFromBackingDirectoryOrDefault(pathToken);
             return virtDir != null
-                   ? virtDir.GetFile(virtualPath)
+                   ? virtDir.GetFile(UntokenizeVirtualPath(virtualPath))
                    : null;
         }
 
@@ -76,7 +81,7 @@ namespace VirtualPath.Common
 
             return virtualPath.Count == 0
                 ? virtDir
-                : virtDir.GetDirectory(virtualPath);
+                : virtDir.GetDirectory(UntokenizeVirtualPath(virtualPath));
         }
 
         public virtual IEnumerable<IVirtualFile> GetAllMatchingFiles(string globPattern, int maxDepth = Int32.MaxValue)
@@ -157,13 +162,13 @@ namespace VirtualPath.Common
 
         protected abstract IVirtualDirectory GetDirectoryFromBackingDirectoryOrDefault(string directoryName);
 
-        public IVirtualFile AddFile(string virtualPath, string contents)
+        public IVirtualFile CreateFile(string virtualPath, string contents)
         {
             var tokens = virtualPath.TokenizeVirtualPath(VirtualPathProvider);
             return AddFile(tokens, contents);
         }
 
-        public IVirtualFile AddFile(string virtualPath, byte[] contents)
+        public IVirtualFile CreateFile(string virtualPath, byte[] contents)
         {
             var tokens = virtualPath.TokenizeVirtualPath(VirtualPathProvider);
             return AddFile(tokens, contents);
@@ -189,7 +194,7 @@ namespace VirtualPath.Common
             var virtDir = GetDirectoryFromBackingDirectoryOrDefault(pathToken);
             if(virtDir != null)
             {
-                return virtDir.AddFile(virtualPath, contents);
+                return virtDir.CreateFile(UntokenizeVirtualPath(virtualPath), contents);
             }
 
             return null;
@@ -218,7 +223,7 @@ namespace VirtualPath.Common
             var virtDir = GetDirectoryFromBackingDirectoryOrDefault(pathToken);
             if (virtDir != null)
             {
-                virtDir.Delete(virtualPath);
+                virtDir.Delete(UntokenizeVirtualPath(virtualPath));
             }
         }
 
@@ -234,7 +239,7 @@ namespace VirtualPath.Common
             parentDir.Delete(this.Name);
         }
 
-        public IVirtualDirectory AddDirectory(string virtualPath)
+        public IVirtualDirectory CreateDirectory(string virtualPath)
         {
             var tokens = virtualPath.TokenizeVirtualPath(VirtualPathProvider);
             return AddDirectory(tokens);
@@ -256,12 +261,12 @@ namespace VirtualPath.Common
             {
                 virtDir = AddDirectoryToBackingDirectoryOrDefault(pathToken);
             }
-            return virtDir.AddDirectory(virtualPath);
+            return virtDir.CreateDirectory(UntokenizeVirtualPath(virtualPath));
         }
 
         protected abstract IVirtualDirectory AddDirectoryToBackingDirectoryOrDefault(string name);
         
-        public System.IO.Stream AddFile(string virtualPath)
+        public System.IO.Stream CreateFile(string virtualPath)
         {
             var tokens = virtualPath.TokenizeVirtualPath(VirtualPathProvider);
             return AddFile(tokens);
@@ -281,7 +286,7 @@ namespace VirtualPath.Common
             var virtDir = GetDirectoryFromBackingDirectoryOrDefault(pathToken);
             if (virtDir != null)
             {
-                return virtDir.AddFile(virtualPath);
+                return virtDir.CreateFile(UntokenizeVirtualPath(virtualPath));
             }
 
             return null;

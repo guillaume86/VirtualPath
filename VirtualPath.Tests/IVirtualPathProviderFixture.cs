@@ -37,11 +37,6 @@ namespace VirtualPath.Tests
             }
         }
 
-        //[TestFixtureTearDown]
-        //public virtual void FixtureTearDown()
-        //{
-        //}
-
         private void Clear()
         {
             foreach (var node in Provider.RootDirectory.ToArray())
@@ -54,7 +49,7 @@ namespace VirtualPath.Tests
         public void AddFile_CreateFile()
         {
             var name = "test.txt";
-            var file = Provider.AddFile(name, "");
+            var file = Provider.CreateFile(name, "");
 
             Assert.That(file, Is.Not.Null);
             Assert.That(file.IsDirectory, Is.False);
@@ -65,7 +60,7 @@ namespace VirtualPath.Tests
         public void AddFile_AddFileToProvider()
         {
             var name = "Test.txt";
-            var file = Provider.AddFile(name, "");
+            var file = Provider.CreateFile(name, "");
 
             Assert.That(Provider.GetFile(name), Is.EqualTo(file));
         }
@@ -74,7 +69,7 @@ namespace VirtualPath.Tests
         public void AddFile_AddFileToRootDirectory()
         {
             var name = "test.txt";
-            var file = Provider.AddFile(name, "");
+            var file = Provider.CreateFile(name, "");
 
             Assert.That(Provider.RootDirectory.GetFile(name), Is.EqualTo(file));
         }
@@ -83,7 +78,7 @@ namespace VirtualPath.Tests
         public void AddFile_CreateFileWithStringContent()
         {
             var content = "blabla";
-            var file = Provider.AddFile("test.txt", content);
+            var file = Provider.CreateFile("test.txt", content);
             Assert.That(file.ReadAllText(), Is.EqualTo(content));
         }
 
@@ -91,7 +86,7 @@ namespace VirtualPath.Tests
         public void AddFile_CreateFileWithBytesContent()
         {
             var content = new byte[] { 0x12, 0x10, (byte)1 };
-            var file = Provider.AddFile("test.txt", content);
+            var file = Provider.CreateFile("test.txt", content);
             using (var stream = file.OpenRead())
             {
                 // Don't use .Length to support non-searchable streams
@@ -119,7 +114,7 @@ namespace VirtualPath.Tests
             var path1 = "folder1";
             var path2 = "folder2";
 
-            var dir = Provider.AddDirectory(path1).AddDirectory(path2);
+            var dir = Provider.CreateDirectory(path1).CreateDirectory(path2);
             var path = Provider.CombineVirtualPath(path1, path2);
             Assert.That(Provider.GetDirectory(path), Is.EqualTo(dir));
         }
@@ -127,7 +122,7 @@ namespace VirtualPath.Tests
         [Test]
         public void DirectoryExists_ReturnCorrectValue()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             Assert.That(Provider.DirectoryExists("/Folder1"), Is.True);
             Assert.That(Provider.DirectoryExists("/xFolder1"), Is.False);
         }
@@ -135,7 +130,7 @@ namespace VirtualPath.Tests
         [Test]
         public void FileExists_ReturnCorrectValue()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             Assert.That(Provider.FileExists("/File1.ext"), Is.True);
             Assert.That(Provider.FileExists("/xFiles"), Is.False);
         }
@@ -143,13 +138,13 @@ namespace VirtualPath.Tests
         [Test]
         public void ReturnAllMatchingFiles_ReturnAllFilesInProvider()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
-            Provider.RootDirectory.AddFile("File2.ext", "");
-            Provider.RootDirectory.AddFile("File3.ext", "");
-            Provider.RootDirectory.AddDirectory("Folder1");
-            Provider.RootDirectory.AddFile("Folder1/File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File2.ext", "");
+            Provider.RootDirectory.CreateFile("File3.ext", "");
+            Provider.RootDirectory.CreateDirectory("Folder1");
+            Provider.RootDirectory.CreateFile("Folder1/File1.ext", "");
 
-            var files = Provider.GetAllMatchingFiles("*.ext");
+            var files = Provider.GetAllMatchingFiles("*.ext", int.MaxValue);
             Assert.That(files.Select(d => d.VirtualPath), Is.EquivalentTo(new[]
             {
                 "/File1.ext",
@@ -163,7 +158,7 @@ namespace VirtualPath.Tests
         [Timeout(100000)]
         public void GetDirectory_ReturnDirectory()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             var dir = Provider.GetDirectory("Folder1");
             Assert.That(dir, Is.Not.Null);
             Assert.That(dir.IsDirectory, Is.True);
@@ -172,7 +167,7 @@ namespace VirtualPath.Tests
         [Test]
         public void GetFile_ReturnFile()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var file = Provider.GetFile("/File1.ext");
             Assert.That(file, Is.Not.Null);
             Assert.That(file.IsDirectory, Is.False);
@@ -181,7 +176,7 @@ namespace VirtualPath.Tests
         [Test]
         public void GetFileHash_ReturnHash()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var fileHash = Provider.GetFileHash("/File1.ext");
             Assert.That(fileHash, Is.Not.Null);
         }
@@ -195,21 +190,21 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddDirectory_CreateDirectory()
         {
-            var dir = Provider.RootDirectory.AddDirectory("Folder1");
+            var dir = Provider.RootDirectory.CreateDirectory("Folder1");
             Assert.That(dir, Is.Not.Null);
         }
 
         [Test]
         public void Directory_AddDirectory_AddDirectoryToProvider()
         {
-            var dir = Provider.RootDirectory.AddDirectory("Folder1");
+            var dir = Provider.RootDirectory.CreateDirectory("Folder1");
             Assert.That(Provider.GetDirectory("Folder1"), Is.EqualTo(dir));
         }
 
         [Test]
         public void Directory_AddDirectory_AddDirectoryToParent()
         {
-            var dir = Provider.RootDirectory.AddDirectory("Folder1");
+            var dir = Provider.RootDirectory.CreateDirectory("Folder1");
             Assert.That(Provider.RootDirectory.GetDirectory("Folder1"), Is.EqualTo(dir));
         }
 
@@ -218,20 +213,14 @@ namespace VirtualPath.Tests
         {
             var dir = Provider.RootDirectory;
             var subDirs = dir.Directories.ToArray();
-            var newDir = dir.AddDirectory("Folder1");
+            var newDir = dir.CreateDirectory("Folder1");
             Assert.That(dir.GetDirectory("Folder1"), Is.EqualTo(newDir));
-        }
-
-        [Test]
-        public void Directory_AddDirectory_ReturnNull_WhenCalledWithEmptyStack()
-        {
-            Assert.That(Provider.RootDirectory.AddDirectory(new Stack<string>()), Is.Null);
         }
 
         [Test]
         public void Directory_AddDirectory_AddDirectoryToParent_WhenCalledWithPath()
         {
-            var dir = Provider.RootDirectory.AddDirectory("/Folder1");
+            var dir = Provider.RootDirectory.CreateDirectory("/Folder1");
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1"), Is.EqualTo(dir));
             Assert.That(Provider.RootDirectory.GetDirectory("Folder1"), Is.EqualTo(dir));
         }
@@ -239,8 +228,8 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddDirectory_DoNotAddDirectoryToRoot_WhenCalledWithPath()
         {
-            var dir = Provider.RootDirectory.AddDirectory("/Folder1");
-            var subDir = dir.AddDirectory("/Folder2");
+            var dir = Provider.RootDirectory.CreateDirectory("/Folder1");
+            var subDir = dir.CreateDirectory("/Folder2");
 
             Assert.That(dir.GetDirectory("/Folder2"), Is.EqualTo(subDir));
             Assert.That(Provider.GetDirectory("/Folder1/Folder2"), Is.EqualTo(subDir));
@@ -250,7 +239,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddDirectory_CreateIntermediatesDirectories_WhenCalledWithDeepPath()
         {
-            var dir = Provider.RootDirectory.AddDirectory("/Folder1/SubFolder1");
+            var dir = Provider.RootDirectory.CreateDirectory("/Folder1/SubFolder1");
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1"), Is.Not.Null);
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1/SubFolder1"), Is.EqualTo(dir));
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1").GetDirectory("SubFolder1"), Is.EqualTo(dir));
@@ -259,7 +248,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddDirectory_AddDirectoryToParent_WhenCalledWithDeepPath()
         {
-            var dir = Provider.RootDirectory.AddDirectory("/Folder1/SubFolder1");
+            var dir = Provider.RootDirectory.CreateDirectory("/Folder1/SubFolder1");
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1/SubFolder1"), Is.EqualTo(dir));
             Assert.That(Provider.RootDirectory.GetDirectory("/Folder1").GetDirectory("SubFolder1"), Is.EqualTo(dir));
         }
@@ -267,8 +256,8 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddDirectory_DontThrowException_WhenAlreadyExists()
         {
-            var dir1 = Provider.RootDirectory.AddDirectory("/Folder1");
-            var dir2 = Provider.RootDirectory.AddDirectory("/Folder1");
+            var dir1 = Provider.RootDirectory.CreateDirectory("/Folder1");
+            var dir2 = Provider.RootDirectory.CreateDirectory("/Folder1");
 
             Assert.That(dir1, Is.EqualTo(dir2));
         }
@@ -276,15 +265,15 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_AddFile_ThrowArgumentException_WhenFileExists()
         {
-            Provider.AddFile("File1.ext", "");
-            Assert.Throws<ArgumentException>(() => Provider.AddFile("File1.ext", ""));
+            Provider.CreateFile("File1.ext", "");
+            Assert.Throws<ArgumentException>(() => Provider.CreateFile("File1.ext", ""));
         }
 
         [Test]
         public void Directory_AddFile_CreateFile()
         {
             var name = "test.txt";
-            var file = Provider.RootDirectory.AddFile(name, "");
+            var file = Provider.RootDirectory.CreateFile(name, "");
 
             Assert.That(file, Is.Not.Null);
             Assert.That(file.IsDirectory, Is.False);
@@ -295,7 +284,7 @@ namespace VirtualPath.Tests
         public void Directory_AddFile_AddFileToProvider()
         {
             var name = "test.txt";
-            var file = Provider.RootDirectory.AddFile(name, "");
+            var file = Provider.RootDirectory.CreateFile(name, "");
 
             Assert.That(Provider.GetFile(name), Is.EqualTo(file));
         }
@@ -304,7 +293,7 @@ namespace VirtualPath.Tests
         public void Directory_AddFile_AddFileToDirectory()
         {
             var name = "test.txt";
-            var file = Provider.RootDirectory.AddFile(name, "");
+            var file = Provider.RootDirectory.CreateFile(name, "");
 
             Assert.That(Provider.RootDirectory.GetFile(name), Is.EqualTo(file));
         }
@@ -313,7 +302,7 @@ namespace VirtualPath.Tests
         public void Directory_AddFile_CreateFileWithStringContent()
         {
             var content = "blabla";
-            var file = Provider.RootDirectory.AddFile("test.txt", content);
+            var file = Provider.RootDirectory.CreateFile("test.txt", content);
             Assert.That(file.ReadAllText(), Is.EqualTo(content));
         }
 
@@ -321,7 +310,7 @@ namespace VirtualPath.Tests
         public void Directory_AddFile_CreateFileWithBytesContent()
         {
             var content = new byte[] { 0x12, 0x10, (byte)1 };
-            var file = Provider.RootDirectory.AddFile("test.txt", content);
+            var file = Provider.RootDirectory.CreateFile("test.txt", content);
             using (var stream = file.OpenRead())
             {
                 // Don't use .Length to support non-searchable streams
@@ -340,7 +329,7 @@ namespace VirtualPath.Tests
         public void Directory_AddFile_CreateFileWithStream()
         {
             var content = new byte[] { 0x12, 0x10, (byte)1 };
-            using (var stream = Provider.RootDirectory.AddFile("test.txt"))
+            using (var stream = Provider.RootDirectory.CreateFile("test.txt"))
             {
                 stream.Write(content, 0, content.Length);
             }
@@ -360,15 +349,9 @@ namespace VirtualPath.Tests
         }
 
         [Test]
-        public void Directory_Delete_DontThrowException_WithEmptyStack()
-        {
-            Provider.RootDirectory.Delete(new Stack<string>());
-        }
-
-        [Test]
         public void Directory_Delete_DeleteSubDirectory()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             Provider.RootDirectory.Delete("Folder1");
             Assert.That(Provider.RootDirectory.GetDirectory("Folder1"), Is.Null);
             Assert.That(Provider.DirectoryExists("Folder1"), Is.False);
@@ -377,7 +360,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_Delete_DeleteItSelf()
         {
-            var dir = Provider.RootDirectory.AddDirectory("Folder1");
+            var dir = Provider.RootDirectory.CreateDirectory("Folder1");
             dir.Delete();
             Assert.That(Provider.RootDirectory.GetDirectory("Folder1"), Is.Null);
             Assert.That(Provider.DirectoryExists("Folder1"), Is.False);
@@ -386,7 +369,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_Delete_DeleteSubDirectory_WhenCalledWithDeepPath()
         {
-            Provider.RootDirectory.AddDirectory("Folder1/Folder2/Folder3");
+            Provider.RootDirectory.CreateDirectory("Folder1/Folder2/Folder3");
             Provider.RootDirectory.Delete("Folder1/Folder2/Folder3");
             var deletedDir = Provider.RootDirectory.GetDirectory("Folder1/Folder2/Folder3");
             Assert.That(deletedDir, Is.Null);
@@ -403,7 +386,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_Name_IsCorrect()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             var dir = Provider.RootDirectory.GetDirectory("Folder1");
             Assert.That(dir.Name, Is.EqualTo("Folder1"));
         }
@@ -411,7 +394,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_LastModified_DoNotThrow()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             var dir = Provider.RootDirectory.GetDirectory("Folder1");
             var date = dir.LastModified;
         }
@@ -419,7 +402,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_ToString_IsNotNull()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             var dir = Provider.RootDirectory.GetDirectory("Folder1");
 
             Assert.That(dir.ToString(), Is.Not.Null);
@@ -428,7 +411,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_RealPath_IsNotNull()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder1");
             var dir = Provider.RootDirectory.GetDirectory("Folder1");
 
             Assert.That(dir.RealPath, Is.Not.Null);
@@ -437,7 +420,7 @@ namespace VirtualPath.Tests
         [Test]
         public void File_RealPath_IsNotNull()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var file = Provider.RootDirectory.GetFile("File1.ext");
             Assert.That(file.RealPath, Is.Not.Null);
         }
@@ -445,7 +428,7 @@ namespace VirtualPath.Tests
         [Test]
         public void File_Extension_IsCorrect()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var file = Provider.RootDirectory.GetFile("File1.ext");
             Assert.That(file.Extension, Is.EqualTo(".ext"));
         }
@@ -453,7 +436,7 @@ namespace VirtualPath.Tests
         [Test]
         public void File_LastModified()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var file = Provider.RootDirectory.GetFile("File1.ext");
             var date = file.LastModified;
         }
@@ -461,7 +444,7 @@ namespace VirtualPath.Tests
         [Test]
         public void Node_Directory_IsNotNull()
         {
-            Provider.RootDirectory.AddFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
             var file = Provider.RootDirectory.GetFile("File1.ext");
             Assert.That(file.Directory, Is.Not.Null);
 
@@ -471,8 +454,8 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_Directories_ReturnCorrectValue()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
-            Provider.RootDirectory.AddDirectory("Folder2");
+            Provider.RootDirectory.CreateDirectory("Folder1");
+            Provider.RootDirectory.CreateDirectory("Folder2");
 
             var dirs = Provider.RootDirectory.Directories;
 
@@ -486,10 +469,10 @@ namespace VirtualPath.Tests
         [Test]
         public void Directory_Files_ReturnCorrectValue()
         {
-            Provider.RootDirectory.AddDirectory("Folder1");
-            Provider.RootDirectory.AddFile("File1.ext", "");
-            Provider.RootDirectory.AddFile("File2.ext", "");
-            Provider.RootDirectory.AddFile("File3.ext", "");
+            Provider.RootDirectory.CreateDirectory("Folder1");
+            Provider.RootDirectory.CreateFile("File1.ext", "");
+            Provider.RootDirectory.CreateFile("File2.ext", "");
+            Provider.RootDirectory.CreateFile("File3.ext", "");
 
             var files = Provider.RootDirectory.Files;
 
@@ -507,7 +490,7 @@ namespace VirtualPath.Tests
             var initial = new byte[] { 0x00, 0x01, 0x02 };
             var content = new byte[] { 0x03, 0x04 };
             var expected = new byte[] { 0x03, 0x04, 0x02 };
-            var file = Provider.AddFile("test.txt", initial);
+            var file = Provider.CreateFile("test.txt", initial);
             using (var stream = file.OpenWrite())
             {
                 stream.Write(content, 0, content.Length);
@@ -521,7 +504,7 @@ namespace VirtualPath.Tests
             var initial = new byte[] { 0x00, 0x01, 0x02 };
             var content = new byte[] { 0x03, 0x04 };
             var expected = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 };
-            var file = Provider.AddFile("test.txt", initial);
+            var file = Provider.CreateFile("test.txt", initial);
             using (var stream = file.OpenWrite(WriteMode.Append))
             {
                 stream.Write(content, 0, content.Length);
@@ -534,12 +517,154 @@ namespace VirtualPath.Tests
         {
             var initial = new byte[] { 0x00, 0x01, 0x02 };
             var content = new byte[] { 0x03, 0x04 };
-            var file = Provider.AddFile("test.txt", initial);
+            var file = Provider.CreateFile("test.txt", initial);
             using (var stream = file.OpenWrite(WriteMode.Truncate))
             {
                 stream.Write(content, 0, content.Length);
             }
             Assert.That(file.ReadAllBytes(), Is.EquivalentTo(content));
+        }
+
+        [Test]
+        public void File_Move_UsingIVirtualDirectory()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderMove");
+
+            var newFile = file.Move(dir);
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Null);
+        }
+
+        [Test]
+        public void File_Move_UsingIVirtualDirectoryAndName()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderMove");
+
+            var newFile = file.Move(dir, "newfile.txt");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Null);
+        }
+
+        [Test]
+        public void File_Move_UsingDestinationVirtualPath()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderMove");
+
+            var newFile = file.Move("FolderMove");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Null);
+        }
+
+        [Test]
+        public void File_Move_UsingDestinationVirtualPathAndName()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderMove");
+
+            var newFile = file.Move("FolderMove", "newfile.txt");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Null);
+        }
+
+        [Test]
+        public void File_Move_CrossProvider()
+        {
+            using (var otherProvider = new InMemoryVirtualPathProvider())
+            {
+                var file = Provider.CreateFile("test.txt", "test data");
+                var dir = otherProvider.CreateDirectory("FolderMove");
+
+                var newFile = file.Move(dir);
+
+                Assert.That(newFile, Is.Not.Null);
+                Assert.That(newFile.Directory, Is.EqualTo(dir));
+                Assert.That(dir.GetFile("test.txt"), Is.EqualTo(newFile));
+                Assert.That(Provider.GetFile("test.txt"), Is.Null);
+            }
+        }
+
+        [Test]
+        public void File_Copy_UsingIVirtualDirectory()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderCopy");
+
+            var newFile = file.Copy(dir);
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Not.Null);
+        }
+
+        [Test]
+        public void File_Copy_UsingIVirtualDirectoryAndName()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderCopy");
+
+            var newFile = file.Copy(dir, "newfile.txt");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Not.Null);
+        }
+
+        [Test]
+        public void File_Copy_UsingDestinationVirtualPath()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderCopy");
+
+            var newFile = file.Copy("FolderCopy");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Not.Null);
+        }
+
+        [Test]
+        public void File_Copy_UsingDestinationVirtualPathAndName()
+        {
+            var file = Provider.CreateFile("test.txt", "test data");
+            var dir = Provider.CreateDirectory("FolderCopy");
+
+            var newFile = file.Copy("FolderCopy", "newfile.txt");
+
+            Assert.That(newFile, Is.Not.Null);
+            Assert.That(newFile.Name, Is.EqualTo("newfile.txt"));
+            Assert.That(newFile.Directory, Is.EqualTo(dir));
+            Assert.That(Provider.GetFile("test.txt"), Is.Not.Null);
+        }
+
+        [Test]
+        public void File_Copy_CrossProvider()
+        {
+            using (var otherProvider = new InMemoryVirtualPathProvider())
+            {
+                var file = Provider.CreateFile("test.txt", "test data");
+                var dir = otherProvider.CreateDirectory("FolderMove");
+
+                var newFile = file.Copy(dir);
+
+                Assert.That(newFile, Is.Not.Null);
+                Assert.That(newFile.Directory, Is.EqualTo(dir));
+                Assert.That(dir.GetFile("test.txt"), Is.EqualTo(newFile));
+                Assert.That(Provider.GetFile("test.txt"), Is.Not.Null);
+            }
         }
     }
 }

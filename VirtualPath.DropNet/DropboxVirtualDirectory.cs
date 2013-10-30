@@ -22,7 +22,7 @@ namespace VirtualPath.DropNet
             _name = name;
         }
 
-        private DropboxVirtualPathProvider Provider
+        internal DropboxVirtualPathProvider Provider
         {
             get { return ((DropboxVirtualPathProvider)VirtualPathProvider); }
         }
@@ -108,19 +108,24 @@ namespace VirtualPath.DropNet
             var node = this.FirstOrDefault(n => ComparePath(n.Name, pathToken));
             if (node == null) return;
 
+            RemoveFromContents(node);
+
+            Provider.Delete(node.VirtualPath);
+        }
+
+        internal void RemoveFromContents(IVirtualNode node)
+        {
             if (Provider.HasMetadata(this.VirtualPath, withContents: true))
             {
                 var content = MetaData.Contents.First(md => String.Equals(md.Path, node.VirtualPath, StringComparison.OrdinalIgnoreCase));
                 MetaData.Contents.Remove(content);
             }
-
-            Provider.Delete(node.VirtualPath);
         }
 
         protected override IVirtualDirectory AddDirectoryToBackingDirectoryOrDefault(string name)
         {
             var virtualPath = Provider.CombineVirtualPath(MetaData.Path, name);
-            var metaData = Provider.CreateDirectory(virtualPath);
+            var metaData = Provider.CreateDirectoryInternal(virtualPath);
 
             // Auto get Contents if not yet fetched?
             if (MetaData.Contents != null

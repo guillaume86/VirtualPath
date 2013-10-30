@@ -124,5 +124,75 @@ namespace VirtualPath.Common
         {
             return OpenText(Encoding.UTF8);
         }
+
+        public virtual IVirtualFile Copy(IVirtualDirectory destination)
+        {
+            return Copy(destination, this.Name);
+        }
+
+        public virtual IVirtualFile Copy(IVirtualDirectory destination, string name)
+        {
+            return CopyBackingFileToDirectory(destination, name);
+        }
+
+        protected abstract IVirtualFile CopyBackingFileToDirectory(IVirtualDirectory directory, string name);
+
+        public virtual IVirtualFile Copy(string destDirVirtualPath)
+        {
+            return Copy(destDirVirtualPath, this.Name);
+        }
+
+        public virtual IVirtualFile Copy(string destDirVirtualPath, string name)
+        {
+            var destination = VirtualPathProvider.GetDirectory(destDirVirtualPath);
+            return Copy(destination, name);
+        }
+
+        public virtual IVirtualFile Copy(System.Collections.Generic.Stack<string> destDirVirtualPath)
+        {
+            var virtualPath = destDirVirtualPath.Aggregate((a, b) => VirtualPathProvider.CombineVirtualPath(a, b));
+            return Copy(virtualPath);
+        }
+
+        public virtual IVirtualFile Copy(System.Collections.Generic.Stack<string> destDirVirtualPath, string name)
+        {
+            var virtualPath = destDirVirtualPath.Aggregate((a, b) => VirtualPathProvider.CombineVirtualPath(a, b));
+            return Copy(virtualPath, name);
+        }
+
+        public virtual IVirtualFile Move(IVirtualDirectory destination)
+        {
+            return Move(destination, this.Name);
+        }
+
+        public virtual IVirtualFile Move(IVirtualDirectory destination, string name)
+        {
+            return MoveBackingFileToDirectory(destination, name);
+        }
+
+        protected abstract IVirtualFile MoveBackingFileToDirectory(IVirtualDirectory directory, string name);
+
+        public virtual IVirtualFile Move(string destDirVirtualPath)
+        {
+            return Move(destDirVirtualPath, this.Name);
+        }
+
+        public virtual IVirtualFile Move(System.Collections.Generic.Stack<string> destDirVirtualPath)
+        {
+            var virtualPath = destDirVirtualPath.Aggregate((a, b) => VirtualPathProvider.CombineVirtualPath(a, b));
+            return Move(virtualPath);
+        }
+
+        public virtual IVirtualFile Move(string destDirVirtualPath, string name)
+        {
+            var destination = VirtualPathProvider.GetDirectory(destDirVirtualPath);
+            return Move(destination, name);
+        }
+
+        public virtual IVirtualFile Move(System.Collections.Generic.Stack<string> destDirVirtualPath, string name)
+        {
+            var virtualPath = destDirVirtualPath.Aggregate((a, b) => VirtualPathProvider.CombineVirtualPath(a, b));
+            return Move(virtualPath, name);
+        }
     }
 }

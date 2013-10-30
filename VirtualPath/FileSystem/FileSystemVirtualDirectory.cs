@@ -13,12 +13,20 @@ namespace VirtualPath.FileSystem
 
         public override IEnumerable<IVirtualFile> Files
         {
-            get { return this.Where(n => !n.IsDirectory).Cast<IVirtualFile>(); }
+            get
+            {
+                return BackingDirInfo.GetFiles()
+                    .Select(fInfo => new FileSystemVirtualFile(VirtualPathProvider, this, fInfo));
+            }
         }
 
         public override IEnumerable<IVirtualDirectory> Directories
         {
-            get { return this.Where(n => n.IsDirectory).Cast<IVirtualDirectory>(); }
+            get
+            {
+                return BackingDirInfo.GetDirectories()
+                    .Select(dInfo => new FileSystemVirtualDirectory(VirtualPathProvider, this, dInfo));
+            }
         }
 
         public override string Name
@@ -44,32 +52,19 @@ namespace VirtualPath.FileSystem
 
         public override IEnumerator<IVirtualNode> GetEnumerator()
         {
-            var directoryNodes = BackingDirInfo.GetDirectories()
-                .Select(dInfo => new FileSystemVirtualDirectory(VirtualPathProvider, this, dInfo));
-
-            var fileNodes = BackingDirInfo.GetFiles()
-                .Select(fInfo => new FileSystemVirtualFile(VirtualPathProvider, this, fInfo));
-
-            return directoryNodes.Cast<IVirtualNode>()
-                .Union<IVirtualNode>(fileNodes.Cast<IVirtualNode>())
+            return Directories
+                .Union(Files.Cast<IVirtualNode>())
                 .GetEnumerator();
         }
 
         protected override IVirtualFile GetFileFromBackingDirectoryOrDefault(string fName)
         {
-            var fInfo = EnumerateFiles(fName).FirstOrDefault();
-
-            return fInfo != null
-                ? new FileSystemVirtualFile(VirtualPathProvider, this, fInfo)
-                : null;
+            return EnumerateFiles(fName).FirstOrDefault();
         }
 
         protected override IEnumerable<IVirtualFile> GetMatchingFilesInDir(string globPattern)
         {
-            var matchingFilesInBackingDir = EnumerateFiles(globPattern)
-                .Select(fInfo => (IVirtualFile)new FileSystemVirtualFile(VirtualPathProvider, this, fInfo));
-
-            return matchingFilesInBackingDir;
+            return EnumerateFiles(globPattern);
         }
 
         protected override IVirtualDirectory GetDirectoryFromBackingDirectoryOrDefault(string dName)
@@ -82,9 +77,10 @@ namespace VirtualPath.FileSystem
                 : null;
         }
 
-        public IEnumerable<FileInfo> EnumerateFiles(string pattern)
+        public override IEnumerable<IVirtualFile> EnumerateFiles(string pattern)
         {
-            return BackingDirInfo.GetFiles(pattern, SearchOption.TopDirectoryOnly);
+            return BackingDirInfo.EnumerateFiles(pattern, SearchOption.TopDirectoryOnly)
+                .Select(fInfo => new FileSystemVirtualFile(VirtualPathProvider, this, fInfo));
         }
 
         public IEnumerable<DirectoryInfo> EnumerateDirectories(string dirName)

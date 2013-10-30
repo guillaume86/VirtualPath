@@ -69,7 +69,6 @@ __Finding the constructor:__
 
 ## Todo
 
-- Move / Copy
 - FTPS by providerName
 - CIFS credentials in FileSystem
 - WebDAV
@@ -80,6 +79,7 @@ __Finding the constructor:__
 
 ## Futures (?)
 
+- Directory Move / Copy ?
 - Amazon S3
 - Google Drive
 - Transactional PathProvider (InMemory commiting to FileSystem for example)

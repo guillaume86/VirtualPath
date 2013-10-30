@@ -4,6 +4,7 @@ namespace VirtualPath
 {
     public interface IVirtualNode
     {
+        IVirtualPathProvider VirtualPathProvider { get; }
         IVirtualDirectory Directory { get; }
         string Name { get; }
         string VirtualPath { get; }

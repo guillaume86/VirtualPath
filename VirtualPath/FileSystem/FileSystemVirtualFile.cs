@@ -50,5 +50,33 @@ namespace VirtualPath.FileSystem
                 default: throw new NotImplementedException();
             }
         }
+
+        protected override IVirtualFile CopyBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            if (directory is FileSystemVirtualDirectory)
+            {
+                var copyFInfo = BackingFile.CopyTo(Path.Combine(directory.RealPath, name), true);
+                return new FileSystemVirtualFile(VirtualPathProvider, directory, copyFInfo);
+            }
+            else
+            {
+                return directory.CopyFile(this, name);
+            }
+        }
+
+        protected override IVirtualFile MoveBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            if (directory is FileSystemVirtualDirectory)
+            {
+                BackingFile.MoveTo(Path.Combine(directory.RealPath, name));
+                return new FileSystemVirtualFile(VirtualPathProvider, directory, BackingFile);
+            }
+            else
+            {
+                var newFile = directory.CopyFile(this, name);
+                this.Delete();
+                return newFile;
+            }
+        }
     }
 }

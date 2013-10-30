@@ -85,19 +85,19 @@ namespace VirtualPath.SshNet
             ConnectedClient.DeleteDirectory(virtualPath);
         }
 
-        internal void AddDirectory(string virtualPath)
+        internal void CreateDirectoryInternal(string virtualPath)
         {
             ConnectedClient.CreateDirectory(virtualPath);
         }
 
-        internal Stream CreateFile(string virtualPath)
+        internal Stream CreateFileInternal(string virtualPath)
         {
             return ConnectedClient.Create(virtualPath);
         }
 
-        internal void CreateFile(string virtualPath, byte[] contents)
+        internal void CreateFileInternal(string virtualPath, byte[] contents)
         {
-            using (var stream = CreateFile(virtualPath))
+            using (var stream = CreateFileInternal(virtualPath))
             {
                 stream.Write(contents, 0, contents.Length);
             }
@@ -120,7 +120,7 @@ namespace VirtualPath.SshNet
         {
             using(var stream = GetStream(virtualPath))
             {
-                var bytes = Extensions.ReadStreamToEnd(stream);
+                var bytes = StreamExtensions.ReadStreamToEnd(stream);
                 return new InMemory.InMemoryStream(
                     (data) => ConnectedClient.WriteAllBytes(virtualPath, data), 
                     bytes);
@@ -145,12 +145,17 @@ namespace VirtualPath.SshNet
                 var bytes = default(byte[]);
                 using(var readStream = GetStream(virtualPath))
                 {
-                    bytes = Extensions.ReadStreamToEnd(readStream);
+                    bytes = StreamExtensions.ReadStreamToEnd(readStream);
                 }
                 var stream = new InMemory.InMemoryStream(onClose, bytes);
                 stream.Seek(stream.Length, System.IO.SeekOrigin.Begin);
                 return stream;
             }
+        }
+
+        internal SftpFile GetSftpFile(string virtualPath)
+        {
+            return ConnectedClient.Get(virtualPath);
         }
     }
 }

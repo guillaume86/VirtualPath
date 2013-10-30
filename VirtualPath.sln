@@ -42,6 +42,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualPath.DotNetZip", "Vi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualPath.DotNetZip.Tests", "VirtualPath.DotNetZip.Tests\VirtualPath.DotNetZip.Tests.csproj", "{C2132D31-78CE-4FDE-B44F-CAE2A81D75C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualPath.EmbeddedResource", "VirtualPath.EmbeddedResource\VirtualPath.EmbeddedResource.csproj", "{951585B5-2D92-4B3B-B825-A3B4FA5D2149}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtualPath.EmbeddedResource.Tests", "VirtualPath.EmbeddedResource.Tests\VirtualPath.EmbeddedResource.Tests.csproj", "{C8C4E799-AC86-4FCC-BA77-A4FD7525691E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +108,14 @@ Global
 		{C2132D31-78CE-4FDE-B44F-CAE2A81D75C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2132D31-78CE-4FDE-B44F-CAE2A81D75C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2132D31-78CE-4FDE-B44F-CAE2A81D75C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{951585B5-2D92-4B3B-B825-A3B4FA5D2149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{951585B5-2D92-4B3B-B825-A3B4FA5D2149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{951585B5-2D92-4B3B-B825-A3B4FA5D2149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{951585B5-2D92-4B3B-B825-A3B4FA5D2149}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8C4E799-AC86-4FCC-BA77-A4FD7525691E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8C4E799-AC86-4FCC-BA77-A4FD7525691E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8C4E799-AC86-4FCC-BA77-A4FD7525691E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C4E799-AC86-4FCC-BA77-A4FD7525691E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,5 +128,6 @@ Global
 		{BEAB4259-A0D6-48CD-83C6-48C82122549C} = {D44B8E08-5D72-41D8-9861-01ABB52BAD1C}
 		{23225E86-B8C9-4789-8BED-384CB8FE0E8A} = {D44B8E08-5D72-41D8-9861-01ABB52BAD1C}
 		{C2132D31-78CE-4FDE-B44F-CAE2A81D75C6} = {D44B8E08-5D72-41D8-9861-01ABB52BAD1C}
+		{C8C4E799-AC86-4FCC-BA77-A4FD7525691E} = {D44B8E08-5D72-41D8-9861-01ABB52BAD1C}
 	EndGlobalSection
 EndGlobal

@@ -17,16 +17,15 @@ namespace VirtualPath
 
         IVirtualFile GetFile(string virtualPath);
         string GetFileHash(string virtualPath);
-        string GetFileHash(IVirtualFile virtualFile);
 
         IVirtualDirectory GetDirectory(string virtualPath);
 
-        IEnumerable<IVirtualFile> GetAllMatchingFiles(string globPattern, int maxDepth = Int32.MaxValue);
+        IEnumerable<IVirtualFile> GetAllMatchingFiles(string globPattern, int maxDepth = 1);
 
-        Stream AddFile(string filePath);
-        IVirtualFile AddFile(string filePath, byte[] contents);
-        IVirtualFile AddFile(string filePath, string contents);
+        Stream CreateFile(string filePath);
+        IVirtualFile CreateFile(string filePath, byte[] contents);
+        IVirtualFile CreateFile(string filePath, string contents);
 
-        IVirtualDirectory AddDirectory(string virtualPath);
+        IVirtualDirectory CreateDirectory(string virtualPath);
     }
 }

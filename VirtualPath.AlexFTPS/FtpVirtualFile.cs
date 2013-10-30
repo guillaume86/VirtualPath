@@ -41,5 +41,29 @@ namespace VirtualPath.AlexFTPS
         {
             return Provider.OpenWrite(VirtualPath, mode);
         }
+
+        protected override IVirtualFile CopyBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            return directory.CopyFile(this, name);
+        }
+
+        protected override IVirtualFile MoveBackingFileToDirectory(IVirtualDirectory directory, string name)
+        {
+            if (directory is FtpVirtualDirectory)
+            {
+                var dir = (FtpVirtualDirectory)directory;
+                if (dir.Provider == this.Provider)
+                {
+                    var currentDir = (FtpVirtualDirectory)this.Directory;
+                    currentDir.RemoveFromContents(this.Name);
+                    Provider.Rename(this.VirtualPath, Provider.CombineVirtualPath(dir.VirtualPath, name));
+                    return new FtpVirtualFile(Provider, dir, name, DateTime.Now);
+                }
+            }
+
+            var newFile = directory.CopyFile(this, name);
+            this.Delete();
+            return newFile;
+        }
     }
 }

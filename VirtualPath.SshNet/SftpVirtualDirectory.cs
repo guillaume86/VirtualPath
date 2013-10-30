@@ -10,7 +10,7 @@ namespace VirtualPath.SshNet
 {
     public class SftpVirtualDirectory : AbstractVirtualDirectoryBase
     {
-        private readonly SftpVirtualPathProvider Provider;
+        internal readonly SftpVirtualPathProvider Provider;
         private SftpFile File;
 
         public SftpVirtualDirectory(SftpVirtualPathProvider owningProvider, IVirtualDirectory parentDirectory, 
@@ -101,6 +101,11 @@ namespace VirtualPath.SshNet
                 Provider.DeleteDirectory(dir.VirtualPath);
             }
 
+            RemoveFromCache(node);
+        }
+
+        internal void RemoveFromCache(IVirtualNode node)
+        {
             if (this._contents != null)
             {
                 this._contents.RemoveAll(c => c.Name == node.Name);
@@ -116,7 +121,7 @@ namespace VirtualPath.SshNet
                 return dir;
             }
 
-            Provider.AddDirectory(virtualPath);
+            Provider.CreateDirectoryInternal(virtualPath);
 
             // TODO: add local collection and make Contents merge both
             this._contents = null;
@@ -132,7 +137,7 @@ namespace VirtualPath.SshNet
             }
 
             var virtualPath = Provider.CombineVirtualPath(this.VirtualPath, fileName);
-            Provider.CreateFile(virtualPath, contents);
+            Provider.CreateFileInternal(virtualPath, contents);
 
             // TODO: add local collection and make Contents merge both
             this._contents = null;
@@ -148,7 +153,7 @@ namespace VirtualPath.SshNet
 
             var virtualPath = Provider.CombineVirtualPath(this.VirtualPath, fileName);
             this._contents = null;
-            return Provider.CreateFile(virtualPath);
+            return Provider.CreateFileInternal(virtualPath);
         }
     }
 }

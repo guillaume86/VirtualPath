@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>VirtualPath.DotNetZip</id>
-    <version>0.2.1</version>
+    <version>0.2.4</version>
     <authors>Guillaume Lecomte</authors>
     <description>DotNetZip library wrapper for VirtualPath</description>
     <language>en-US</language>
@@ -10,7 +10,7 @@
     <licenseUrl>https://raw.github.com/guillaume86/VirtualPath/master/LICENSE</licenseUrl>
     <tags>virtualpath zip dotnetzip</tags>
     <dependencies>
-      <dependency id="VirtualPath" version="0.2.1" />
+      <dependency id="VirtualPath" version="0.2.4" />
     </dependencies>
   </metadata>
 </package>

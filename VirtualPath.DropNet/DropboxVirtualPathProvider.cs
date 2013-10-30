@@ -118,7 +118,7 @@ namespace VirtualPath.DropNet
             MetaDataCache.Remove(virtualPath);
         }
 
-        internal MetaData CreateDirectory(string virtualPath)
+        internal MetaData CreateDirectoryInternal(string virtualPath)
         {
             var dir = (DropboxVirtualDirectory)GetDirectory(virtualPath);
             if (dir != null)
@@ -188,6 +188,18 @@ namespace VirtualPath.DropNet
                 }
                 return stream;
             }
+        }
+
+        internal void Move(string virtualPathSrc, string virtualPathDst)
+        {
+            var md = Client.Move(virtualPathSrc, virtualPathDst);
+            RefreshCache(md);
+        }
+
+        internal void Copy(string virtualPathSrc, string virtualPathDst)
+        {
+            var md = Client.Copy(virtualPathSrc, virtualPathDst);
+            RefreshCache(md);
         }
     }
 }
