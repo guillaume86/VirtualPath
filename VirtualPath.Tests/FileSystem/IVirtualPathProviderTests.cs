@@ -16,7 +16,7 @@ namespace VirtualPath.Tests.FileSystem
 
         }
 
-        public static string RootPath = "C:\\Temp\\";
+		public static string RootPath = "C:\\Temp\\vpathtests";
 
         public static IVirtualPathProvider GetProvider()
         {
@@ -29,10 +29,10 @@ namespace VirtualPath.Tests.FileSystem
 
         public override void SetUp()
         {
-            if (Directory.EnumerateFileSystemEntries(RootPath).Any())
-            {
-                throw new Exception("Can't start tests in non-empty directory.");
-            }
+			if (!Directory.Exists(RootPath))
+			{
+				Directory.CreateDirectory(RootPath);
+			}
             base.SetUp();
         }
     }
