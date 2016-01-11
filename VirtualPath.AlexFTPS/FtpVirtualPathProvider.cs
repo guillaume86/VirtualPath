@@ -12,17 +12,16 @@ using VirtualPath.Common;
 namespace VirtualPath.AlexFTPS
 {
     [Export("AlexFTPS", typeof(IVirtualPathProvider))]
-    //[Export("FTPS", typeof(IVirtualPathProvider))] // TODO: subclass
-    [Export("FTP", typeof(IVirtualPathProvider))] // TODO: subclass
+    [Export("FTP", typeof(IVirtualPathProvider))]
     public class FtpVirtualPathProvider : AbstractVirtualPathProviderBase
     {
-        private string Host;
-        private string Username;
-        private string Password;
-        private bool IsConnected;
-        private int? Port;
+		protected string Host;
+		protected string Username;
+		protected string Password;
+        protected bool IsConnected;
+		protected int? Port;
 
-        public FTPSClient Client { get; private set; }
+        public FTPSClient Client { get; protected set; }
 
         private FTPSClient ConnectedClient
         {
@@ -57,26 +56,14 @@ namespace VirtualPath.AlexFTPS
 
         }
 
-        private void Connect()
+        protected virtual void Connect()
         {
-            if (Port != null)
-            {
-                Client.Connect(
-                    this.Host,
-                    this.Port.Value,
-                    new NetworkCredential(this.Username, this.Password),
-                    //ESSLSupportMode.CredentialsRequired | ESSLSupportMode.DataChannelRequested);
-                    ESSLSupportMode.ClearText,
-                    null, null, 0, 0, 0, null);
-            }
-            else
-            {
-                Client.Connect(
-                    this.Host,
-                    new NetworkCredential(this.Username, this.Password),
-                    //ESSLSupportMode.CredentialsRequired | ESSLSupportMode.DataChannelRequested);
-                    ESSLSupportMode.ClearText);
-            }
+			Client.Connect(
+				this.Host,
+				this.Port ?? 21,
+				new NetworkCredential(this.Username, this.Password),
+				ESSLSupportMode.ClearText,
+				null, null, 0, 0, 0, null);
 
             IsConnected = true;
         }

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>VirtualPath.AlexFTPS</id>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
     <authors>Guillaume Lecomte</authors>
     <description>AlexFTPS library wrapper for VirtualPath</description>
     <language>en-US</language>
@@ -10,7 +10,7 @@
     <licenseUrl>https://raw.github.com/guillaume86/VirtualPath/master/LICENSE</licenseUrl>
     <tags>virtualpath ftp ftps</tags>
     <dependencies>
-      <dependency id="VirtualPath" version="0.3.0" />
+      <dependency id="VirtualPath" version="0.3.1" />
     </dependencies>
   </metadata>
 </package>
