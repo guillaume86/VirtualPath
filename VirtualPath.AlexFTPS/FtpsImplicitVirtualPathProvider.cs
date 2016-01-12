@@ -14,20 +14,14 @@ namespace VirtualPath.AlexFTPS
 	[Export("ImplicitFTPS", typeof(IVirtualPathProvider))]
 	public class FtpsImplicitVirtualPathProvider : FtpsVirtualPathProvider
     {
-		public FtpsImplicitVirtualPathProvider(string host, int? port, string username, string password)
+		public FtpsImplicitVirtualPathProvider(string host, int port, string username, string password)
 			: base (ESSLSupportMode.Implicit, host, port, username, password)
         {
 
         }
 
         public FtpsImplicitVirtualPathProvider(string host, string username, string password)
-			: this(host, null, username, password)
-        {
-
-        }
-
-		public FtpsImplicitVirtualPathProvider(string host, int port, string username, string password)
-			: this(host, (int?)port, username, password)
+			: this(host, 990, username, password)
         {
 
         }

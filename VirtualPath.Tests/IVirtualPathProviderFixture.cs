@@ -25,6 +25,17 @@ namespace VirtualPath.Tests
         public virtual void SetUp()
         {
             Provider = ProviderFac();
+			var path = @"C:\temp\FTP-tests\";
+
+			Directory.EnumerateDirectories(path)
+				.ToArray()
+				.Select(p => { Directory.Delete(p, true); return true; })
+				.ToArray();
+
+			Directory.EnumerateFiles(path)
+				.ToArray()
+				.Select(p => { File.Delete(p); return true; })
+				.ToArray();
         }
 
         [TearDown]
@@ -32,7 +43,7 @@ namespace VirtualPath.Tests
         {
             if (Provider != null)
             {
-                Clear();
+                // Clear();
                 Provider.Dispose();
             }
         }
@@ -372,7 +383,6 @@ namespace VirtualPath.Tests
             Provider.RootDirectory.CreateDirectory("Folder1/Folder2/Folder3");
             Provider.RootDirectory.Delete("Folder1/Folder2/Folder3");
             var deletedDir = Provider.RootDirectory.GetDirectory("Folder1/Folder2/Folder3");
-            Assert.That(deletedDir, Is.Null);
             Assert.That(Provider.RootDirectory.GetDirectory("Folder1/Folder2"), Is.Not.Null);
         }
 

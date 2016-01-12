@@ -17,14 +17,14 @@ namespace VirtualPath.AlexFTPS
     {
 		private ESSLSupportMode sslMode;
 
-		public FtpsVirtualPathProvider(ESSLSupportMode sslMode, string host, int? port, string username, string password)
+		public FtpsVirtualPathProvider(ESSLSupportMode sslMode, string host, int port, string username, string password)
 			: base (new FTPSClient(), host, port, username, password)
         {
 			this.sslMode = sslMode;
         }
 
         public FtpsVirtualPathProvider(string host, string username, string password)
-			: this(ESSLSupportMode.DataChannelRequested, host, null, username, password)
+			: this(ESSLSupportMode.DataChannelRequested, host, 21, username, password)
         {
 
         }
