@@ -112,19 +112,19 @@ namespace VirtualPath.AlexFTPS
 
 		public bool FileExists(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			return GetFile(virtualPath) != null;
 		}
 
 		public bool DirectoryExists(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			return GetDirectory(virtualPath) != null;
 		}
 
 		public IVirtualFile GetFile(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			var directoryPath = this.GetParentPath(virtualPath);
 			this.FetchListing(directoryPath);
 
@@ -135,13 +135,13 @@ namespace VirtualPath.AlexFTPS
 
 		public string GetFileHash(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			return GetFile(virtualPath).GetFileHash();
 		}
 
 		public IVirtualDirectory GetDirectory(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			var node = default(IVirtualNode);
 			var exists = this.nodes.TryGetValue(virtualPath, out node);
 			if (!exists)
@@ -159,15 +159,15 @@ namespace VirtualPath.AlexFTPS
 			return (IVirtualDirectory)node;
 		}
 
-		private AFtpVirtualDirectory GetOrAddDirectory(string virtualPath)
+		private FtpVirtualDirectory GetOrAddDirectory(string virtualPath)
 		{
-			var node = new AFtpVirtualDirectory(this, virtualPath);
+			var node = new FtpVirtualDirectory(this, virtualPath);
 			return this.AddOrGetNode(node);
 		}
 
-		private AFtpVirtualFile GetOrAddFile(string virtualPath)
+		private FtpVirtualFile GetOrAddFile(string virtualPath)
 		{
-			var node = new AFtpVirtualFile(this, virtualPath);
+			var node = new FtpVirtualFile(this, virtualPath);
 			return this.AddOrGetNode(node);
 		}
 
@@ -213,7 +213,7 @@ namespace VirtualPath.AlexFTPS
 
 		internal IEnumerable<IVirtualFile> GetAllMatchingFiles(string path, string globPattern, int maxDepth = 1)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 			this.FetchListing(path);
 
 			var dir = this.GetDirectory(path);
@@ -233,7 +233,7 @@ namespace VirtualPath.AlexFTPS
 
 		public System.IO.Stream CreateFile(string filePath)
 		{
-			filePath = MakeAbsolutePath(filePath);
+			filePath = NormalizeAbsolutePath(filePath);
 
 			if (this.nodes.ContainsKey(filePath)) throw new ArgumentException("File already exists", "filePath");
 
@@ -242,15 +242,16 @@ namespace VirtualPath.AlexFTPS
 			return ConnectedClient.PutFile(filePath);
 		}
 
-		private string MakeAbsolutePath(string path)
+		private string NormalizeAbsolutePath(string path)
 		{
+			path = path.TrimEnd('/');
 			if (!path.StartsWith("/")) return "/" + path;
 			return path;
 		}
 
 		public IVirtualFile CreateFile(string filePath, byte[] contents)
 		{
-			filePath = MakeAbsolutePath(filePath);
+			filePath = NormalizeAbsolutePath(filePath);
 			using (var stream = CreateFile(filePath))
 			{
 				stream.Write(contents, 0, contents.Length);
@@ -261,14 +262,14 @@ namespace VirtualPath.AlexFTPS
 
 		public IVirtualFile CreateFile(string filePath, string contents)
 		{
-			filePath = MakeAbsolutePath(filePath);
+			filePath = NormalizeAbsolutePath(filePath);
 			var bytes = System.Text.Encoding.UTF8.GetBytes(contents);
 			return this.CreateFile(filePath, bytes);
 		}
 
 		public IVirtualDirectory CreateDirectory(string virtualPath)
 		{
-			virtualPath = MakeAbsolutePath(virtualPath);
+			virtualPath = NormalizeAbsolutePath(virtualPath);
 			var parentPath = this.GetParentPath(virtualPath);
 			
 			try
@@ -293,13 +294,13 @@ namespace VirtualPath.AlexFTPS
 
 		internal System.IO.Stream OpenRead(string path)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 			return ConnectedClient.GetFile(path);
 		}
 
 		internal Stream OpenWrite(string path, WriteMode mode)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 			if (mode == WriteMode.Truncate)
 			{
 				return ConnectedClient.PutFile(path);
@@ -334,7 +335,7 @@ namespace VirtualPath.AlexFTPS
 
 		internal void DeleteFile(string path)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 			ConnectedClient.DeleteFile(path);
 
 			if (this.nodes.ContainsKey(path))
@@ -345,7 +346,7 @@ namespace VirtualPath.AlexFTPS
 
 		internal void DeleteDirectory(string path)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 
 			var node = this.GetDirectory(path);
 
@@ -373,20 +374,20 @@ namespace VirtualPath.AlexFTPS
 
 		internal IEnumerator<IVirtualNode> GetChildren(string path)
 		{
-			path = MakeAbsolutePath(path);
+			path = NormalizeAbsolutePath(path);
 			this.FetchListing(path);
 			return this.nodes.Values
 				.Where(n => this.GetParentPath(n.VirtualPath) == path)
 				.GetEnumerator();
 		}
 
-		internal IVirtualFile Move(AFtpVirtualFile source, IVirtualDirectory destination, string destFilename)
+		internal IVirtualFile Move(FtpVirtualFile source, IVirtualDirectory destination, string destFilename)
 		{
 			if (destination.VirtualPathProvider == this)
 			{
 				var destPath = this.CombineVirtualPath(destination.VirtualPath, destFilename);
 				this.ConnectedClient.RenameFile(source.VirtualPath, destPath);
-				this.nodes.Remove(MakeAbsolutePath(source.VirtualPath));
+				this.nodes.Remove(NormalizeAbsolutePath(source.VirtualPath));
 				return this.GetOrAddFile(destPath);
 			}
 			else
@@ -398,13 +399,13 @@ namespace VirtualPath.AlexFTPS
 		}
 	}
 
-	internal class AFtpVirtualDirectory : IVirtualDirectory
+	internal class FtpVirtualDirectory : IVirtualDirectory
 	{
 		private readonly FtpVirtualPathProvider provider;
 		private readonly string path;
 		private DateTime lastModified;
 
-		public AFtpVirtualDirectory(FtpVirtualPathProvider provider, string path)
+		public FtpVirtualDirectory(FtpVirtualPathProvider provider, string path)
 		{
 			this.provider = provider;
 			this.path = path;
@@ -526,13 +527,13 @@ namespace VirtualPath.AlexFTPS
 		}
 	}
 
-	internal class AFtpVirtualFile : IVirtualFile
+	internal class FtpVirtualFile : IVirtualFile
 	{
 		private readonly FtpVirtualPathProvider provider;
 		private string path;
 		private DateTime lastModified;
 
-		public AFtpVirtualFile(FtpVirtualPathProvider provider, string path)
+		public FtpVirtualFile(FtpVirtualPathProvider provider, string path)
 		{
 			this.provider = provider;
 			this.path = path;

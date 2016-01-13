@@ -175,6 +175,17 @@ namespace VirtualPath.Tests
             Assert.That(dir.IsDirectory, Is.True);
         }
 
+		[Test]
+		public void GetDirectory_IgnoreTrailingPathSeparator()
+		{
+			Provider.RootDirectory.CreateDirectory("Folder1");
+
+			var dir1 = Provider.GetDirectory("Folder1");
+			var dir2 = Provider.GetDirectory("Folder1/");
+
+			Assert.That(dir1, Is.EqualTo(dir2));
+		}
+
         [Test]
         public void GetFile_ReturnFile()
         {
