@@ -35,6 +35,12 @@ namespace VirtualPath.SshNet
             this.Client = client;
         }
 
+		public SftpVirtualPathProvider(ConnectionInfo connectionInfo)
+			: base()
+		{
+			this.Client = new SftpClient(connectionInfo);
+		}
+
         public SftpVirtualPathProvider(string host, string username, string password)
             : this(GetClient(host, username, password)) { }
 
